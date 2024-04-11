@@ -3,12 +3,28 @@ from stmol import showmol
 import py3Dmol
 import requests
 import biotite.structure.io as bsio
+import py3Dmol
+from Bio import PDB
+import matplotlib.pyplot as plt
+from graphein.protein.analysis import plot_residue_composition
+from graphein.protein.graphs import construct_graph
+from graphein.protein.config import ProteinGraphConfig, DSSPConfig
+from graphein.protein.edges.distance import (
+    add_aromatic_interactions,
+    add_disulfide_interactions,
+    add_hydrophobic_interactions,
+    add_peptide_bonds,
+)
+from graphein.protein.visualisation import plotly_protein_structure_graph
+from graphein.protein.analysis import plot_edge_type_distribution
 
 tab1, tab2, tab3 = st.tabs(["3-D Model Visualization", "Insights", "About the Project"])
 
 st.sidebar.title('Proteios')
 
+
 st.sidebar.write(Proteios is a sophisticated platform that predicts how proteins behave, aiding researchers in comprehending the intricate functions and structures of molecules. By leveraging advanced algorithms and interactive visualizations, Proteios offers deep insights, facilitating scientific understanding and discovery in the field of molecular biology and bioinformatics.)
+
 
 # stmol
 def render_mol(pdb):
@@ -34,18 +50,25 @@ def update(sequence=txt):
         headers = {
             'Content-Type': 'application/x-www-form-urlencoded',
         }
+
         response = requests.post('https://api.esmatlas.com/foldSequence/v1/pdb/', headers=headers, data=sequence,verify = False)
         name = sequence[:3] + sequence[-3:]
         pdb_string = response.content.decode('utf-8')
 
-        with open('predicted.pdb', 'w') as f:
-            f.write(pdb_string)
+        #with open('predicted.pdb', 'w') as f:
+        #   f.write(pdb_string)
+
+        f ="predicted.pdb"
+
+        g = generate_visual_graphein(f)
+        
 
         struct = bsio.load_structure('predicted.pdb', extra_fields=["b_factor"])
         b_value = round(struct.b_factor.mean(), 4)
 
         st.subheader('Visualization of predicted protein structure')
-        render_mol(pdb_string)
+        #render_mol(pdb_string)
+        st.write(plotly_protein_structure_graph(g, node_size_multiplier=1))
 
         st.subheader('plDDT')
         st.write('plDDT is a per-residue estimate of the confidence in prediction on a scale from 0-100.')
@@ -90,6 +113,24 @@ def about_us():
 
 with tab3:
     about_us()
+
+
+def generate_visual_graphein(pdb_file):
+    config = ProteinGraphConfig(
+     edge_construction_functions=[       # List of functions to call to construct edges.
+         add_hydrophobic_interactions,
+         add_aromatic_interactions,
+         add_disulfide_interactions,
+         add_peptide_bonds,
+     ],
+     #graph_metadata_functions=[asa, rsa],  # Add ASA and RSA features.
+     #dssp_config=DSSPConfig(),             # Add DSSP config in order to compute ASA and RSA.
+    )  
+    g = construct_graph(path=pdb_file, config=config)
+
+    return g
+
+
 
     
 
