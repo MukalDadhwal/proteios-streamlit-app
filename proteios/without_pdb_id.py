@@ -23,7 +23,9 @@ tab1, tab2, tab3 = st.tabs(["3-D Model Visualization", "Insights", "About the Pr
 
 st.sidebar.title('Proteios')
 
-st.sidebar.write('La La La') #sidebar paragraph replace with meaningful things
+
+st.sidebar.write(Proteios is a sophisticated platform that predicts how proteins behave, aiding researchers in comprehending the intricate functions and structures of molecules. By leveraging advanced algorithms and interactive visualizations, Proteios offers deep insights, facilitating scientific understanding and discovery in the field of molecular biology and bioinformatics.)
+
 
 # stmol
 def render_mol(pdb):
@@ -56,6 +58,8 @@ def generate_visual_graphein(pdb_file):
 # Protein sequence input
 DEFAULT_SEQ = "MGSSHHHHHHSSGLVPRGSHMRGPNPTAASLEASAGPFTVRSFTVSRPSGYGAGTVYYPTNAGGTVGAIAIVPGYTARQSSIKWWGPRLASHGFVVITIDTNSTLDQPSSRSSQQMAALRQVASLNGTSSSPIYGKVDTARMGVMGWSMGGGGSLISAANNPSLKAAAPQAPWDSSTNFSSVTVPTLIFACENDSIAPVNSSALPIYDSMSRNAKQFLEINGGSHSCANSGNSNQALIGKKGVAWMKRFMDNDTRYSTFACENPNSTRVSDFRTANCSLEDPAANKARKEAELAAATAEQ"
 txt = st.sidebar.text_area('Input sequence', DEFAULT_SEQ, height=275)
+
+st.set_page_config(page_title='Proteios', layout = 'wide', page_icon = 'proteios.png', initial_sidebar_state = 'auto')
 
 # ESMfold
 def update(sequence=txt):
