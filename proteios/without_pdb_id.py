@@ -20,6 +20,7 @@ from graphein.protein.analysis import plot_edge_type_distribution
 
 tab1, tab2, tab3 = st.tabs(["3-D Model Visualization", "Insights", "About the Project"])
 
+
 st.sidebar.title('Proteios')
 
 st.sidebar.write('La La La') #sidebar paragraph replace with meaningful things
@@ -35,6 +36,23 @@ def render_mol(pdb):
     pdbview.spin(True)
     showmol(pdbview, height = 500,width=800)
 
+
+def generate_visual_graphein(pdb_file):
+    config = ProteinGraphConfig(
+     edge_construction_functions=[       # List of functions to call to construct edges.
+         add_hydrophobic_interactions,
+         add_aromatic_interactions,
+         add_disulfide_interactions,
+         add_peptide_bonds,
+     ],
+     #graph_metadata_functions=[asa, rsa],  # Add ASA and RSA features.
+     #dssp_config=DSSPConfig(),             # Add DSSP config in order to compute ASA and RSA.
+    )  
+    g = construct_graph(path=pdb_file, config=config)
+
+    return g
+
+
 # Protein sequence input
 DEFAULT_SEQ = "MGSSHHHHHHSSGLVPRGSHMRGPNPTAASLEASAGPFTVRSFTVSRPSGYGAGTVYYPTNAGGTVGAIAIVPGYTARQSSIKWWGPRLASHGFVVITIDTNSTLDQPSSRSSQQMAALRQVASLNGTSSSPIYGKVDTARMGVMGWSMGGGGSLISAANNPSLKAAAPQAPWDSSTNFSSVTVPTLIFACENDSIAPVNSSALPIYDSMSRNAKQFLEINGGSHSCANSGNSNQALIGKKGVAWMKRFMDNDTRYSTFACENPNSTRVSDFRTANCSLEDPAANKARKEAELAAATAEQ"
 txt = st.sidebar.text_area('Input sequence', DEFAULT_SEQ, height=275)
@@ -42,9 +60,7 @@ txt = st.sidebar.text_area('Input sequence', DEFAULT_SEQ, height=275)
 # ESMfold
 def update(sequence=txt):
     with tab1:
-        if not predict:
-            st.warning('👈 Enter protein sequence data!')
-            
+   
         headers = {
             'Content-Type': 'application/x-www-form-urlencoded',
         }
@@ -60,7 +76,6 @@ def update(sequence=txt):
 
         g = generate_visual_graphein(f)
         
-
         struct = bsio.load_structure('predicted.pdb', extra_fields=["b_factor"])
         b_value = round(struct.b_factor.mean(), 4)
 
@@ -79,7 +94,15 @@ def update(sequence=txt):
             mime='text/plain',
         )
 
+        return g
+
+
+graph = update()
+
 predict = st.sidebar.button('Predict', on_click=update)
+
+#if not predict:
+  #          st.warning('👈 Enter protein sequence data!')
 
 
 def about_us():
@@ -109,24 +132,19 @@ def about_us():
     LinkedIn: [Prabhsurat's Link](https://www.linkedin.com/in/prabhsurat-singh-1868052ab/)
     """)
 
+
+with tab2:
+    fig = plot_residue_composition(graph, sort_by="count", plot_type="pie") # Can also sort by "alphabetical"
+    st.write(fig)
+
+    fig2 = plot_edge_type_distribution(graph, plot_type="bar", title="Edge Type Distribution")
+    st.write(fig2)
+
+
 with tab3:
     about_us()
 
 
-def generate_visual_graphein(pdb_file):
-    config = ProteinGraphConfig(
-     edge_construction_functions=[       # List of functions to call to construct edges.
-         add_hydrophobic_interactions,
-         add_aromatic_interactions,
-         add_disulfide_interactions,
-         add_peptide_bonds,
-     ],
-     #graph_metadata_functions=[asa, rsa],  # Add ASA and RSA features.
-     #dssp_config=DSSPConfig(),             # Add DSSP config in order to compute ASA and RSA.
-    )  
-    g = construct_graph(path=pdb_file, config=config)
-
-    return g
 
 
 
