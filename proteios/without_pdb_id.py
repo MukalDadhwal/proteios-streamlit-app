@@ -8,7 +8,7 @@ tab1, tab2, tab3 = st.tabs(["3-D Model Visualization", "Insights", "About the Pr
 
 st.sidebar.title('Proteios')
 
-st.sidebar.write('[*ESMFold*](https://esmatlas.com/about) is an end-to-end single sequence protein structure predictor based on the ESM-2 language model. For more information, read the [research article](https://www.biorxiv.org/content/10.1101/2022.07.20.500902v2) and the [news article](https://www.nature.com/articles/d41586-022-03539-1) published in *Nature*.')
+st.sidebar.write(Proteios is a sophisticated platform that predicts how proteins behave, aiding researchers in comprehending the intricate functions and structures of molecules. By leveraging advanced algorithms and interactive visualizations, Proteios offers deep insights, facilitating scientific understanding and discovery in the field of molecular biology and bioinformatics.)
 
 # stmol
 def render_mol(pdb):
