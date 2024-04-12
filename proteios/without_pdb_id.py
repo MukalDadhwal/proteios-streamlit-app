@@ -19,6 +19,8 @@ from graphein.protein.visualisation import plotly_protein_structure_graph
 from graphein.protein.analysis import plot_edge_type_distribution
 from graphein.protein.analysis import plot_degree_by_residue_type
 from PIL import Image
+from fpdf import FPDF
+import base64
 
 
 tab1, tab2, tab3 = st.tabs(["3-D Model Visualization", "Insights", "About the Project"])
@@ -28,7 +30,7 @@ with st.sidebar.container(height=250,border=False):
     st.image(logo_url)
 
 
-st.sidebar.write("\nProteios is a sophisticated platform that predicts how proteins behave, aiding researchers in comprehending the intricate functions and structures of molecules. By leveraging advanced algorithms and interactive visualizations, Proteios offers deep insights, facilitating scientific understanding and discovery in the field of molecular biology and bioinformatics.\n")
+st.sidebar.write("A one option tool to Visualise Protein Compound by using libraries like Graphene and BioPython to generate 3D views of proteins and provide in-depth information about their structure and constituents.\n")
 
 # stmol
 def render_mol(pdb):
@@ -165,16 +167,24 @@ def about_us():
 
 
 with tab2:
+    st.title("Residue Composition")
     fig = plot_residue_composition(graph, sort_by="count", plot_type="pie") # Can also sort by "alphabetical"
+    st.write("Residue composition in proteins refers to the types and quantities of amino acid residues present in a protein molecule. Amino acids are the building blocks of proteins, and each amino acid has its own unique chemical properties.")
     st.write(fig)
 
+    st.title("Edge Type Distribution")
     fig2 = plot_edge_type_distribution(graph, plot_type="bar", title="Edge Type Distribution")
+    st.write("Edge Type Distribution in proteins refers to the proportion and variety of interactions between amino acid residues within the protein structure, including covalent bonds, hydrogen bonds, van der Waals forces, hydrophobic interactions, and electrostatic interactions. Analyzing this distribution provides insights into the protein's structural stability, folding pattern, and functional properties")
     st.write(fig2)
 
+    st.title("Total Degree by Residue Type:- Type-1")
     fig3 = plot_degree_by_residue_type(graph, normalise_by_residue_occurrence=False)
+    st.write("It refers to the sum of connections or interactions that each type of amino acid residue forms within a protein structure. In other words, it quantifies how many bonds or interactions each amino acid type participates in within the protein.")
     st.write(fig3)
 
+    st.title("Total Degree by Residue Type:- Type-2")
     fig4 = plot_degree_by_residue_type(graph, normalise_by_residue_occurrence=True)
+    st.write("The following refers to a calculation that takes into account both the number of interactions formed by each type of amino acid residue and the frequency of occurrence of each residue type within the protein structure.")
     st.write(fig4)
 
 
