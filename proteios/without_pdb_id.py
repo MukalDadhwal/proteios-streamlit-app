@@ -17,15 +17,18 @@ from graphein.protein.edges.distance import (
 )
 from graphein.protein.visualisation import plotly_protein_structure_graph
 from graphein.protein.analysis import plot_edge_type_distribution
+from graphein.protein.analysis import plot_degree_by_residue_type
+from PIL import Image
+
 
 tab1, tab2, tab3 = st.tabs(["3-D Model Visualization", "Insights", "About the Project"])
 
+with st.sidebar.container(height=250,border=False):
+    logo_url = "proteios\logo_1.png"
+    st.image(logo_url)
 
-st.sidebar.title('Proteios')
 
-
-st.sidebar.write(Proteios is a sophisticated platform that predicts how proteins behave, aiding researchers in comprehending the intricate functions and structures of molecules. By leveraging advanced algorithms and interactive visualizations, Proteios offers deep insights, facilitating scientific understanding and discovery in the field of molecular biology and bioinformatics.)
-
+st.sidebar.write("\nProteios is a sophisticated platform that predicts how proteins behave, aiding researchers in comprehending the intricate functions and structures of molecules. By leveraging advanced algorithms and interactive visualizations, Proteios offers deep insights, facilitating scientific understanding and discovery in the field of molecular biology and bioinformatics.\n")
 
 # stmol
 def render_mol(pdb):
@@ -56,54 +59,78 @@ def generate_visual_graphein(pdb_file):
 
 
 # Protein sequence input
-DEFAULT_SEQ = "MGSSHHHHHHSSGLVPRGSHMRGPNPTAASLEASAGPFTVRSFTVSRPSGYGAGTVYYPTNAGGTVGAIAIVPGYTARQSSIKWWGPRLASHGFVVITIDTNSTLDQPSSRSSQQMAALRQVASLNGTSSSPIYGKVDTARMGVMGWSMGGGGSLISAANNPSLKAAAPQAPWDSSTNFSSVTVPTLIFACENDSIAPVNSSALPIYDSMSRNAKQFLEINGGSHSCANSGNSNQALIGKKGVAWMKRFMDNDTRYSTFACENPNSTRVSDFRTANCSLEDPAANKARKEAELAAATAEQ"
-txt = st.sidebar.text_area('Input sequence', DEFAULT_SEQ, height=275)
+txt1 = "MKPALVVVDMVNEFIHGRLATPEAMKTVGPARKVIETFRRSGLPVVYVNDSHYPDDPEIRIWGRHSMKGDDGSEVIDEIRPSAGDYVLEKHAYSGFYGTNLDMILRANGIDTVVLIGLDADICVRHTAADALYRNYRIIVVEDAVAARIDPNWKDYFTRVYGATVKRSDEIEGMLQEDQIET"
+txt = st.sidebar.text_input('Input sequence',txt1)
+#if not txt:
+    #txt = "SNAGGSATGTGLVYVDAFTRFHCLWDASHPECPARVSTVMEMLETEGLLGRCVQVEARAVTEDELLLVHTKEYVELMKSTQNMTEEELKTLAEKYDSVYLHPGFFSSACLSVGSVLQLVDKVMTSQLRNGFSINRPPGHHAQADKMNGFCMFNNLAIAARYAQKRHRVQRVLIVDWDVHHGQGIQYIFEEDPSVLYFSVHRYEDGSFWPHLKESDSSSVGSGAGQGYNINLPWNKVGMESGDYITAFQQLLLPVAYEFQPQLVLVAAGFDAVIGDPKGGMQVSPECFSILTHMLKGVAQGRLVLALEGGYNLQSTAEGVCASMRSLLGDPCPHLPSSGAPCESALKSISKTISDLYPFWKSLQTFE"
+        
 
-st.set_page_config(page_title='Proteios', layout = 'wide', page_icon = 'proteios.png', initial_sidebar_state = 'auto')
+#st.set_page_config(page_title='Proteios', layout = 'wide', page_icon = 'proteios.png', initial_sidebar_state = 'auto')
 
 # ESMfold
-def update(sequence=txt):
+def update(condition,sequence = txt):
     with tab1:
-   
-        headers = {
-            'Content-Type': 'application/x-www-form-urlencoded',
-        }
-
-        response = requests.post('https://api.esmatlas.com/foldSequence/v1/pdb/', headers=headers, data=sequence,verify = False)
-        name = sequence[:3] + sequence[-3:]
-        pdb_string = response.content.decode('utf-8')
-
-        #with open('predicted.pdb', 'w') as f:
-        #   f.write(pdb_string)
-
-        f ="predicted.pdb"
-
-        g = generate_visual_graphein(f)
         
-        struct = bsio.load_structure('predicted.pdb', extra_fields=["b_factor"])
-        b_value = round(struct.b_factor.mean(), 4)
+        # headers = {
+        #     'Content-Type': 'application/x-www-form-urlencoded',
+        # }
 
-        st.subheader('Visualization of predicted protein structure')
-        #render_mol(pdb_string)
-        st.write(plotly_protein_structure_graph(g, node_size_multiplier=1))
+        # response = requests.post('https://api.esmatlas.com/foldSequence/v1/pdb/', headers=headers, data=sequence,verify = False)
+        # #name = sequence[:3] + sequence[-3:]
+        # pdb_string = response.content.decode('utf-8')
 
-        st.subheader('plDDT')
-        st.write('plDDT is a per-residue estimate of the confidence in prediction on a scale from 0-100.')
-        st.info(f'plDDT: {b_value}')
+        # with open('predicted.pdb', 'w') as f:
+        #    f.write(pdb_string)
 
-        st.download_button(
-            label="Download PDB",
-            data=pdb_string,
-            file_name='predicted.pdb',
-            mime='text/plain',
-        )
+        # ##global file_name
+        # #file_name ="predicted.pdb"
 
-        return g
+        # g = generate_visual_graphein("predicted.pdb")
+
+        if condition == True:
+
+            headers = {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            }   
+
+            response = requests.post('https://api.esmatlas.com/foldSequence/v1/pdb/', headers=headers, data=sequence,verify = False)
+            #name = sequence[:3] + sequence[-3:]
+            pdb_string = response.content.decode('utf-8')
+
+            with open('predicted.pdb', 'w') as f:
+                f.write(pdb_string)
+
+            g = generate_visual_graphein("predicted.pdb")
+            
+            struct = bsio.load_structure('predicted.pdb', extra_fields=["b_factor"])
+            b_value = round(struct.b_factor.mean(), 4)
+
+            st.subheader('Visualization of predicted protein structure')
+            #render_mol(pdb_string)
+            st.write(plotly_protein_structure_graph(g, node_size_multiplier=1))
+
+            st.subheader('plDDT')
+            st.write('plDDT is a per-residue estimate of the confidence in prediction on a scale from 0-100.')
+            st.info(f'plDDT: {b_value}')
+
+            st.download_button(
+                label="Download PDB",
+                data=pdb_string,
+                file_name='predicted.pdb',
+                mime='text/plain',
+            )
+            
+        else:
+            g = generate_visual_graphein("predicted.pdb")
+            return g
 
 
-graph = update()
+#file_name = "predicted.pdb"
+#graph = generate_visual_graphein(file_name)
 
-predict = st.sidebar.button('Predict', on_click=update)
+predict = st.sidebar.button('Predict', on_click=update(condition=True))
+
+graph = update(condition = False)
 
 #if not predict:
   #          st.warning('👈 Enter protein sequence data!')
@@ -143,6 +170,12 @@ with tab2:
 
     fig2 = plot_edge_type_distribution(graph, plot_type="bar", title="Edge Type Distribution")
     st.write(fig2)
+
+    fig3 = plot_degree_by_residue_type(graph, normalise_by_residue_occurrence=False)
+    st.write(fig3)
+
+    fig4 = plot_degree_by_residue_type(graph, normalise_by_residue_occurrence=True)
+    st.write(fig4)
 
 
 with tab3:
